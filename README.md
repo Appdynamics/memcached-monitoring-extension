@@ -3,6 +3,7 @@ memcached-monitoring-extension
 An AppDynamics extension to be used with a stand alone Java machine agent to provide metrics from memcached instances.
 
 ## Metrics Provided ##
+```
 |-----------------------+---------+---------------------------------|
 | Name                  | Meaning                                   |
 |-----------------------+-------------------------------------------|
@@ -66,8 +67,7 @@ An AppDynamics extension to be used with a stand alone Java machine agent to pro
 | slabs_moved           | Total slab pages moved                    |
 | crawler_reclaimed     | Total items freed by LRU Crawler          |
 |-----------------------+-------------------------------------------|
-
-
+```
 ## Installation ##
 
 1. Download and unzip MemcachedMonitor.zip from AppSphere.
