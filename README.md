@@ -99,7 +99,7 @@ An AppDynamics extension to be used with a stand alone Java machine agent to pro
   ```
 
 ## Custom Dashboard ##
-![](https://github.com/Appdynamics/url-pinger-monitoring-extension/raw/master/memcached-dashboard.png)
+![](https://raw.githubusercontent.com/Appdynamics/memcached-monitoring-extension/master/memcached-dashboard.png?token=7142645__eyJzY29wZSI6IlJhd0Jsb2I6QXBwZHluYW1pY3MvbWVtY2FjaGVkLW1vbml0b3JpbmctZXh0ZW5zaW9uL21hc3Rlci9tZW1jYWNoZWQtZGFzaGJvYXJkLnBuZyIsImV4cGlyZXMiOjEzOTg4MDc5MDh9--1f7ec9a9e4c72826204e1a7adb8ac5d0f5e879b8)
 
 ## Contributing ##
 
