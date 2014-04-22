@@ -1,0 +1,8 @@
+servers:
+  - server: "localhost:11211"
+    displayName: localhost
+  - serv
+    displayName: myUbuntu
+
+metricPrefix:  "Custom Metrics|Memcached|"
+

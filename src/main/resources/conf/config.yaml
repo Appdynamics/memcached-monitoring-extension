@@ -1,0 +1,8 @@
+servers:
+  - server: "localhost:11211"
+    displayName: localhost
+  - server: "myUbuntu.sandbox.appdynamics.com:11211"
+    displayName: myUbuntu
+
+metricPrefix:  "Custom Metrics|Memcached|"
+

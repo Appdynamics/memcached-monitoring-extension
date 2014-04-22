@@ -1,0 +1,24 @@
+<monitor>
+    <name>memcached-monitor</name>
+    <type>managed</type>
+    <description>Memcached Monitoring Extension</description>
+    <monitor-configuration></monitor-configuration>
+    <monitor-run-task>
+        <execution-style>periodic</execution-style>
+        <execution-frequency-in-seconds>60</execution-frequency-in-seconds>
+        <name>Memcached Monitor Run task</name>
+        <display-name>Memcached Monitor Run task</display-name>
+        <description>This extension monitors the configured memcached nodes.</description>
+        <type>java</type>
+        <execution-timeout-in-secs>60</execution-timeout-in-secs>
+        <task-arguments>
+            <!-- config file-->
+            <argument name="config-file" is-required="true" default-value="monitors/MemcachedMonitor/config.yaml" />
+            <argument name="log-prefix" is-required="false" default-value="[MemcachedAppDExt] " />
+        </task-arguments>
+        <java-task>
+            <classpath>memcached-monitoring-extension.jar</classpath>
+            <impl-class>com.appdynamics.extensions.memcached.MemcachedMonitor</impl-class>
+        </java-task>
+    </monitor-run-task>
+</monitor>
