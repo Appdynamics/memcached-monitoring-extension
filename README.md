@@ -99,7 +99,7 @@ An AppDynamics extension to be used with a stand alone Java machine agent to pro
   ```
 
 ## Custom Dashboard ##
-![](https://github.com/Appdynamics/url-pinger-monitoring-extension/raw/master/url-pinger-dashboard.png)
+![](https://github.com/Appdynamics/url-pinger-monitoring-extension/raw/master/memcached-dashboard.png)
 
 ## Contributing ##
 
