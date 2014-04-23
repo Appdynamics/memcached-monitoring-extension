@@ -65,25 +65,27 @@ public class MemcachedMonitor extends AManagedMonitor{
     }
 
     public TaskOutput execute(Map<String, String> taskArgs, TaskExecutionContext taskExecutionContext) throws TaskExecutionException {
-        setLogPrefix(taskArgs.get(LOG_PREFIX));
-        logger.info(getLogPrefix() + "Starting the Memcached Monitoring task.");
-        if(logger.isDebugEnabled()){
-            logger.debug(getLogPrefix() + "Task Arguments Passed ::" + taskArgs);
-        }
-        String configFilename = getConfigFilename(taskArgs.get(CONFIG_ARG));
-        try {
-            //read the config.
-            Configuration config = readConfig(configFilename);
-            //collect the metrics
-            Map<String,Metrics> stats = collectMetrics(config);
-            //print the metrics
-            printStats(config,stats);
-            logger.info(getLogPrefix() + "Memcached monitoring task completed successfully.");
-            return new TaskOutput(getLogPrefix() + "Memcached monitoring task completed successfully.");
-        } catch (FileNotFoundException e) {
-            logger.error(getLogPrefix() + "Config file not found :: " + configFilename,e);
-        } catch (Exception e) {
-            logger.error(getLogPrefix() + "Metrics collection failed",e);
+        if(taskArgs != null) {
+            setLogPrefix(taskArgs.get(LOG_PREFIX));
+            logger.info(getLogPrefix() + "Starting the Memcached Monitoring task.");
+            if (logger.isDebugEnabled()) {
+                logger.debug(getLogPrefix() + "Task Arguments Passed ::" + taskArgs);
+            }
+            String configFilename = getConfigFilename(taskArgs.get(CONFIG_ARG));
+            try {
+                //read the config.
+                Configuration config = readConfig(configFilename);
+                //collect the metrics
+                Map<String, Metrics> stats = collectMetrics(config);
+                //print the metrics
+                printStats(config, stats);
+                logger.info(getLogPrefix() + "Memcached monitoring task completed successfully.");
+                return new TaskOutput(getLogPrefix() + "Memcached monitoring task completed successfully.");
+            } catch (FileNotFoundException e) {
+                logger.error(getLogPrefix() + "Config file not found :: " + configFilename, e);
+            } catch (Exception e) {
+                logger.error(getLogPrefix() + "Metrics collection failed", e);
+            }
         }
         throw new TaskExecutionException(getLogPrefix() + "Memcached monitoring task completed with failures.");
     }

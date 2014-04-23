@@ -7,6 +7,7 @@ import org.junit.Test;
 
 
 import java.util.Map;
+import java.util.concurrent.Executors;
 
 import static junit.framework.TestCase.assertTrue;
 
@@ -41,5 +42,10 @@ public class MemcachedMonitorTest {
     public void testMemcachedMonitorWithNoConfig() throws TaskExecutionException {
         Map<String,String> taskArgs = Maps.newHashMap();
         TaskOutput output = memcachedMonitor.execute(taskArgs, null);
+    }
+
+    @Test(expected = TaskExecutionException.class)
+    public void shouldThrowExceptionWhenTaskArgsIsNull() throws TaskExecutionException {
+        TaskOutput output = memcachedMonitor.execute(null, null);
     }
 }
