@@ -36,4 +36,10 @@ public class MemcachedMonitorTest {
         taskArgs.put("config-file","src/test/resources/conf/config_with_error.yaml");
         TaskOutput output = memcachedMonitor.execute(taskArgs, null);
     }
+
+    @Test(expected = TaskExecutionException.class)
+    public void testMemcachedMonitorWithNoConfig() throws TaskExecutionException {
+        Map<String,String> taskArgs = Maps.newHashMap();
+        TaskOutput output = memcachedMonitor.execute(taskArgs, null);
+    }
 }

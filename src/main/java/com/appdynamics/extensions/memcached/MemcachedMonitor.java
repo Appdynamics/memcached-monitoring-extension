@@ -218,6 +218,9 @@ public class MemcachedMonitor extends AManagedMonitor{
      * @return String
      */
     private String getConfigFilename(String filename) {
+        if(filename == null){
+            return "";
+        }
         //for absolute paths
         if(new File(filename).exists()){
             return filename;
