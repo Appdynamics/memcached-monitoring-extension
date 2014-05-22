@@ -75,6 +75,10 @@ An AppDynamics extension to be used with a stand alone Java machine agent to pro
 
 
 ## Configuration ##
+
+###Note
+Please make sure to not use tab (\t) while editing yaml files. You may want to validate the yaml file using a yaml validator http://yamllint.com/
+
 1. Configure the memcached instances by editing the config.yaml file in `<MACHINE_AGENT_HOME>/monitors/MemcachedMonitor/`. Below is the format
 
   ```
