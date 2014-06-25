@@ -120,6 +120,7 @@ For any questions or feature request, please contact [AppDynamics Center of Exce
 
 **Version:** 1.0
 **Controller Compatibility:** 3.7 or later
+**Memcached Version Tested On:** 1.4.13
 
 [GitHub]: https://github.com/Appdynamics/memcached-monitoring-extension
 [Community]: http://community.appdynamics.com/
