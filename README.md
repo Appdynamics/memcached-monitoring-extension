@@ -102,6 +102,24 @@ Please make sure to not use tab (\t) while editing yaml files. You may want to v
      </task-arguments>
 
      ```
+### Cluster level metrics
+ 
+As of 1.0.0 version of this extension, we support cluster level metrics only if each node in the cluster have a separate machine agent installed on it. There are two configurations required for this setup 
+ 
+1. Make sure that nodes belonging to the same cluster has the same <tier-name> in the<MACHINE_AGENT_HOME>/conf/controller-info.xml, we can gather cluster level metrics.  The tier-name here should be your cluster name. 
+ 
+2. Make sure that in every node in the cluster, the <MACHINE_AGENT_HOME>/monitors/MemcachedMonitor/config.yaml should emit the same metric path. To achieve this make the displayName to be empty string and remove the trailing "|" in the metricPrefix.  The config.yaml should be something as below
+
+``` 
+  servers:
+    - server: "localhost:11211"
+      displayName: ""
+    
+
+  metricPrefix:  "Custom Metrics|Memcached"
+```
+
+Please note that for now the cluster level metrics are obtained by the summing all the node level metrics in a cluster. Other operations like (average) will be supported in the future releases of the extension.
 
 ## Custom Dashboard ##
 ![](https://raw.githubusercontent.com/Appdynamics/memcached-monitoring-extension/master/memcached-dashboard.png?token=7142645__eyJzY29wZSI6IlJhd0Jsb2I6QXBwZHluYW1pY3MvbWVtY2FjaGVkLW1vbml0b3JpbmctZXh0ZW5zaW9uL21hc3Rlci9tZW1jYWNoZWQtZGFzaGJvYXJkLnBuZyIsImV4cGlyZXMiOjEzOTg4MDc5MDh9--1f7ec9a9e4c72826204e1a7adb8ac5d0f5e879b8)
