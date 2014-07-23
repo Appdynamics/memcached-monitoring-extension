@@ -249,47 +249,54 @@ public class MemcachedMonitor extends AManagedMonitor{
 
 
     private void printServerMetrics(String metricName, Metrics serverMetrics) {
-        printCollectiveObservedCurrent(metricName + METRIC_SEPARATOR + Metrics.CURR_ITEMS,serverMetrics.getCurrentItems());
-        printCollectiveObservedCurrent(metricName + METRIC_SEPARATOR + Metrics.TOTAL_ITEMS,serverMetrics.getTotalItems());
-        printCollectiveObservedCurrent(metricName + METRIC_SEPARATOR + Metrics.BYTES,serverMetrics.getBytes());
-        printCollectiveObservedCurrent(metricName + METRIC_SEPARATOR + Metrics.CURR_CONNECTIONS,serverMetrics.getCurrentConnections());
-        printCollectiveObservedCurrent(metricName + METRIC_SEPARATOR + Metrics.TOTAL_CONNECTIONS,serverMetrics.getTotalConnections());
-        printCollectiveObservedCurrent(metricName + METRIC_SEPARATOR + Metrics.CONNECTION_STRUCTURES,serverMetrics.getConnectionStructures());
-        printCollectiveObservedCurrent(metricName + METRIC_SEPARATOR + Metrics.RESERVED_FDS,serverMetrics.getReservedFds());
-        printCollectiveObservedCurrent(metricName + METRIC_SEPARATOR + Metrics.CMD_GET,serverMetrics.getGetCommands());
-        printCollectiveObservedCurrent(metricName + METRIC_SEPARATOR + Metrics.CMD_SET,serverMetrics.getSetCommands());
-        printCollectiveObservedCurrent(metricName + METRIC_SEPARATOR + Metrics.CMD_FLUSH,serverMetrics.getFlushCommands());
-        printCollectiveObservedCurrent(metricName + METRIC_SEPARATOR + Metrics.CMD_TOUCH,serverMetrics.getTouchCommands());
-        printCollectiveObservedCurrent(metricName + METRIC_SEPARATOR + Metrics.GET_HITS,serverMetrics.getGetHits());
-        printCollectiveObservedCurrent(metricName + METRIC_SEPARATOR + Metrics.GET_MISSES,serverMetrics.getGetMisses());
-        printCollectiveObservedCurrent(metricName + METRIC_SEPARATOR + Metrics.DELETE_MISSES,serverMetrics.getDeleteMisses());
-        printCollectiveObservedCurrent(metricName + METRIC_SEPARATOR + Metrics.DELETE_HITS,serverMetrics.getDeleteHits());
-        printCollectiveObservedCurrent(metricName + METRIC_SEPARATOR + Metrics.INCR_HITS,serverMetrics.getIncrHits());
-        printCollectiveObservedCurrent(metricName + METRIC_SEPARATOR + Metrics.INCR_MISSES,serverMetrics.getIncrMisses());
-        printCollectiveObservedCurrent(metricName + METRIC_SEPARATOR + Metrics.DECR_HITS,serverMetrics.getDecrHits());
-        printCollectiveObservedCurrent(metricName + METRIC_SEPARATOR + Metrics.DECR_MISSES,serverMetrics.getDecrMisses());
-        printCollectiveObservedCurrent(metricName + METRIC_SEPARATOR + Metrics.CAS_HITS,serverMetrics.getCasHits());
-        printCollectiveObservedCurrent(metricName + METRIC_SEPARATOR + Metrics.CAS_MISSES,serverMetrics.getCasMisses());
-        printCollectiveObservedCurrent(metricName + METRIC_SEPARATOR + Metrics.CAS_BADVAL,serverMetrics.getCasBadValues());
-        printCollectiveObservedCurrent(metricName + METRIC_SEPARATOR + Metrics.TOUCH_HITS,serverMetrics.getTouchHits());
-        printCollectiveObservedCurrent(metricName + METRIC_SEPARATOR + Metrics.TOUCH_MISSES,serverMetrics.getTouchMisses());
-        printCollectiveObservedCurrent(metricName + METRIC_SEPARATOR + Metrics.AUTH_CMDS,serverMetrics.getAuthCommands());
-        printCollectiveObservedCurrent(metricName + METRIC_SEPARATOR + Metrics.AUTH_ERRORS,serverMetrics.getAuthErrors());
-        printCollectiveObservedCurrent(metricName + METRIC_SEPARATOR + Metrics.EVICTIONS,serverMetrics.getEvictions());
-        printCollectiveObservedCurrent(metricName + METRIC_SEPARATOR + Metrics.RECLAIMED,serverMetrics.getReclaimed());
-        printCollectiveObservedCurrent(metricName + METRIC_SEPARATOR + Metrics.BYTES_READ,serverMetrics.getBytesRead());
-        printCollectiveObservedCurrent(metricName + METRIC_SEPARATOR + Metrics.BYTES_WRITTEN,serverMetrics.getBytesWritten());
-        printCollectiveObservedCurrent(metricName + METRIC_SEPARATOR + Metrics.LIMIT_MAXBYTES,serverMetrics.getLimitMaxBytes());
-        printCollectiveObservedCurrent(metricName + METRIC_SEPARATOR + Metrics.THREADS,serverMetrics.getThreads());
-        printCollectiveObservedCurrent(metricName + METRIC_SEPARATOR + Metrics.CONN_YIELDS,serverMetrics.getYieldedConnections());
-        printCollectiveObservedCurrent(metricName + METRIC_SEPARATOR + Metrics.HASH_BYTES,serverMetrics.getHashBytes());
-        printCollectiveObservedCurrent(metricName + METRIC_SEPARATOR + Metrics.SLABS_MOVED,serverMetrics.getSlabsMoved());
-        printCollectiveObservedCurrent(metricName + METRIC_SEPARATOR + Metrics.EXPIRED_UNFETCHED,serverMetrics.getExpiredUnfetched());
-        printCollectiveObservedCurrent(metricName + METRIC_SEPARATOR + Metrics.EVICTED_UNFETCHED,serverMetrics.getEvictedUnfetched());
-        printCollectiveObservedCurrent(metricName + METRIC_SEPARATOR + Metrics.CRAWLER_RECLAIMED,serverMetrics.getCrawlerReclaimed());
+        printAverageAverageIndividual(metricName + METRIC_SEPARATOR + Metrics.CURR_ITEMS,serverMetrics.getCurrentItems());
+        printAverageAverageIndividual(metricName + METRIC_SEPARATOR + Metrics.TOTAL_ITEMS,serverMetrics.getTotalItems());
+        printAverageAverageIndividual(metricName + METRIC_SEPARATOR + Metrics.BYTES,serverMetrics.getBytes());
+        printAverageAverageIndividual(metricName + METRIC_SEPARATOR + Metrics.CURR_CONNECTIONS,serverMetrics.getCurrentConnections());
+        printAverageAverageIndividual(metricName + METRIC_SEPARATOR + Metrics.TOTAL_CONNECTIONS,serverMetrics.getTotalConnections());
+        printAverageAverageIndividual(metricName + METRIC_SEPARATOR + Metrics.CONNECTION_STRUCTURES,serverMetrics.getConnectionStructures());
+        printAverageAverageIndividual(metricName + METRIC_SEPARATOR + Metrics.RESERVED_FDS,serverMetrics.getReservedFds());
+        printAverageAverageIndividual(metricName + METRIC_SEPARATOR + Metrics.CMD_GET,serverMetrics.getGetCommands());
+        printAverageAverageIndividual(metricName + METRIC_SEPARATOR + Metrics.CMD_SET,serverMetrics.getSetCommands());
+        printAverageAverageIndividual(metricName + METRIC_SEPARATOR + Metrics.CMD_FLUSH,serverMetrics.getFlushCommands());
+        printAverageAverageIndividual(metricName + METRIC_SEPARATOR + Metrics.CMD_TOUCH,serverMetrics.getTouchCommands());
+        printAverageAverageIndividual(metricName + METRIC_SEPARATOR + Metrics.GET_HITS,serverMetrics.getGetHits());
+        printAverageAverageIndividual(metricName + METRIC_SEPARATOR + Metrics.GET_MISSES,serverMetrics.getGetMisses());
+        printAverageAverageIndividual(metricName + METRIC_SEPARATOR + Metrics.DELETE_MISSES,serverMetrics.getDeleteMisses());
+        printAverageAverageIndividual(metricName + METRIC_SEPARATOR + Metrics.DELETE_HITS,serverMetrics.getDeleteHits());
+        printAverageAverageIndividual(metricName + METRIC_SEPARATOR + Metrics.INCR_HITS,serverMetrics.getIncrHits());
+        printAverageAverageIndividual(metricName + METRIC_SEPARATOR + Metrics.INCR_MISSES,serverMetrics.getIncrMisses());
+        printAverageAverageIndividual(metricName + METRIC_SEPARATOR + Metrics.DECR_HITS,serverMetrics.getDecrHits());
+        printAverageAverageIndividual(metricName + METRIC_SEPARATOR + Metrics.DECR_MISSES,serverMetrics.getDecrMisses());
+        printAverageAverageIndividual(metricName + METRIC_SEPARATOR + Metrics.CAS_HITS,serverMetrics.getCasHits());
+        printAverageAverageIndividual(metricName + METRIC_SEPARATOR + Metrics.CAS_MISSES,serverMetrics.getCasMisses());
+        printAverageAverageIndividual(metricName + METRIC_SEPARATOR + Metrics.CAS_BADVAL,serverMetrics.getCasBadValues());
+        printAverageAverageIndividual(metricName + METRIC_SEPARATOR + Metrics.TOUCH_HITS,serverMetrics.getTouchHits());
+        printAverageAverageIndividual(metricName + METRIC_SEPARATOR + Metrics.TOUCH_MISSES,serverMetrics.getTouchMisses());
+        printAverageAverageIndividual(metricName + METRIC_SEPARATOR + Metrics.AUTH_CMDS,serverMetrics.getAuthCommands());
+        printAverageAverageIndividual(metricName + METRIC_SEPARATOR + Metrics.AUTH_ERRORS,serverMetrics.getAuthErrors());
+        printAverageAverageIndividual(metricName + METRIC_SEPARATOR + Metrics.EVICTIONS,serverMetrics.getEvictions());
+        printAverageAverageIndividual(metricName + METRIC_SEPARATOR + Metrics.RECLAIMED,serverMetrics.getReclaimed());
+        printAverageAverageIndividual(metricName + METRIC_SEPARATOR + Metrics.BYTES_READ,serverMetrics.getBytesRead());
+        printAverageAverageIndividual(metricName + METRIC_SEPARATOR + Metrics.BYTES_WRITTEN,serverMetrics.getBytesWritten());
+        printAverageAverageIndividual(metricName + METRIC_SEPARATOR + Metrics.LIMIT_MAXBYTES,serverMetrics.getLimitMaxBytes());
+        printAverageAverageIndividual(metricName + METRIC_SEPARATOR + Metrics.THREADS,serverMetrics.getThreads());
+        printAverageAverageIndividual(metricName + METRIC_SEPARATOR + Metrics.CONN_YIELDS,serverMetrics.getYieldedConnections());
+        printAverageAverageIndividual(metricName + METRIC_SEPARATOR + Metrics.HASH_BYTES,serverMetrics.getHashBytes());
+        printAverageAverageIndividual(metricName + METRIC_SEPARATOR + Metrics.SLABS_MOVED,serverMetrics.getSlabsMoved());
+        printAverageAverageIndividual(metricName + METRIC_SEPARATOR + Metrics.EXPIRED_UNFETCHED,serverMetrics.getExpiredUnfetched());
+        printAverageAverageIndividual(metricName + METRIC_SEPARATOR + Metrics.EVICTED_UNFETCHED,serverMetrics.getEvictedUnfetched());
+        printAverageAverageIndividual(metricName + METRIC_SEPARATOR + Metrics.CRAWLER_RECLAIMED,serverMetrics.getCrawlerReclaimed());
 
     }
 
+    private void printAverageAverageIndividual(String metricPath, String metricValue) {
+        printMetric(metricPath, metricValue,
+                MetricWriter.METRIC_AGGREGATION_TYPE_AVERAGE,
+                MetricWriter.METRIC_TIME_ROLLUP_TYPE_AVERAGE,
+                MetricWriter.METRIC_CLUSTER_ROLLUP_TYPE_INDIVIDUAL
+        );
+    }
 
     private void printCollectiveObservedCurrent(String metricName, String metricValue) {
         printMetric(metricName, metricValue,

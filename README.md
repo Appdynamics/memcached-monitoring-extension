@@ -103,23 +103,48 @@ Please make sure to not use tab (\t) while editing yaml files. You may want to v
 
      ```
 ### Cluster level metrics
- 
-As of 1.0.0 version of this extension, we support cluster level metrics only if each node in the cluster have a separate machine agent installed on it. There are two configurations required for this setup 
- 
-1. Make sure that nodes belonging to the same cluster has the same <tier-name> in the<MACHINE_AGENT_HOME>/conf/controller-info.xml, we can gather cluster level metrics.  The tier-name here should be your cluster name. 
- 
-2. Make sure that in every node in the cluster, the <MACHINE_AGENT_HOME>/monitors/MemcachedMonitor/config.yaml should emit the same metric path. To achieve this make the displayName to be empty string and remove the trailing "|" in the metricPrefix.  The config.yaml should be something as below
+     
+We support cluster level metrics only if each node in the cluster have a separate machine agent installed on it. There are two configurations required for this setup 
 
-``` 
+1. Make sure that nodes belonging to the same cluster has the same <tier-name> in the <MACHINE_AGENT_HOME>/conf/controller-info.xml, we can gather cluster level metrics.  The tier-name here should be your cluster name. 
+
+2. Make sure that in every node in the cluster, the <MACHINE_AGENT_HOME>/monitors/MemcachedMonitor/config.yaml should emit the same metric path. To achieve this make the displayName to be empty string and remove the trailing "|" in the metricPrefix.  
+
+
+To make it more clear,assume that Memcached "Node A" and Memcached "Node B" belong to the same cluster "ClusterAB". In order to achieve cluster level as well as node level metrics, you should do the following
+        
+1. Both Node A and Node B should have separate machine agents installed on them. Both the machine agent should have their own Memcached extension.
+    
+2. In the Node A's and Node B's machine agents' controller-info.xml make sure that you have the tier name to be your cluster name , "ClusterAB" here. Also, nodeName in controller-info.xml is Node A and Node B resp.
+        
+3. The config.yaml for Node A and Node B should be
+
+```
   servers:
     - server: "localhost:11211"
       displayName: ""
-    
+   
 
   metricPrefix:  "Custom Metrics|Memcached"
-```
 
-Please note that for now the cluster level metrics are obtained by the summing all the node level metrics in a cluster. Other operations like (average) will be supported in the future releases of the extension.
+```
+Now, if Node A and Node B are reporting say a metric called ReadLatency to the controller, with the above configuration they will be reporting it using the same metric path.
+        
+Node A reports Custom Metrics | ClusterAB | ReadLatency = 50 
+Node B reports Custom Metrics | ClusterAB | ReadLatency = 500
+        
+The controller will automatically average out the metrics at the cluster (tier) level as well. So you should be able to see the cluster level metrics under
+        
+Application Performance Management | Custom Metrics | ClusterAB | ReadLatency = 225
+        
+Also, now if you want to see individual node metrics you can view it under
+        
+Application Performance Management | Custom Metrics | ClusterAB | Individual Nodes | Node A | ReadLatency = 50 
+Application Performance Management | Custom Metrics | ClusterAB | Individual Nodes | Node B | ReadLatency = 500
+
+
+
+Please note that for now the cluster level metrics are obtained by the averaging all the individual node level metrics in a cluster.
 
 ## Custom Dashboard ##
 ![](https://raw.githubusercontent.com/Appdynamics/memcached-monitoring-extension/master/memcached-dashboard.png?token=7142645__eyJzY29wZSI6IlJhd0Jsb2I6QXBwZHluYW1pY3MvbWVtY2FjaGVkLW1vbml0b3JpbmctZXh0ZW5zaW9uL21hc3Rlci9tZW1jYWNoZWQtZGFzaGJvYXJkLnBuZyIsImV4cGlyZXMiOjEzOTg4MDc5MDh9--1f7ec9a9e4c72826204e1a7adb8ac5d0f5e879b8)
