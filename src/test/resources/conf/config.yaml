@@ -1,8 +1,8 @@
 servers:
   - server: "localhost:11211"
     displayName: localhost
-    - server: "192.168.57.102:11211"
-      displayName: myUbuntu
+  - server: "192.168.57.102:11211"
+    displayName: myUbuntu
 
 metricPrefix:  "Custom Metrics|Memcached|"
 
