@@ -259,8 +259,8 @@ public class MemcachedMonitor extends AManagedMonitor{
                 timeRollupType,
                 clusterRollupType
         );
-        System.out.println("Sending [" + aggType + METRIC_SEPARATOR + timeRollupType + METRIC_SEPARATOR + clusterRollupType
-                + "] metric = " + metricName + " = " + metricValue);
+     //   System.out.println("Sending [" + aggType + METRIC_SEPARATOR + timeRollupType + METRIC_SEPARATOR + clusterRollupType
+     //           + "] metric = " + metricName + " = " + metricValue);
         if (logger.isDebugEnabled()) {
             logger.debug("Sending [" + aggType + METRIC_SEPARATOR + timeRollupType + METRIC_SEPARATOR + clusterRollupType
                     + "] metric = " + metricName + " = " + metricValue);
