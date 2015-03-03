@@ -16,13 +16,16 @@
 
 package com.appdynamics.extensions.memcached.config;
 
+import com.appdynamics.extensions.util.metrics.MetricOverride;
+
 /**
  * An object holder for the configuration file
  */
 public class Configuration {
 
-    String metricPrefix;
+    String metricPathPrefix;
     Server[] servers;
+    MetricOverride[] metricOverrides;
 
     public Server[] getServers() {
         return servers;
@@ -32,12 +35,19 @@ public class Configuration {
         this.servers = servers;
     }
 
-    public String getMetricPrefix() {
-        return metricPrefix;
+    public String getMetricPathPrefix() {
+        return metricPathPrefix;
     }
 
-    public void setMetricPrefix(String metricPrefix) {
-        this.metricPrefix = metricPrefix;
+    public void setMetricPathPrefix(String metricPathPrefix) {
+        this.metricPathPrefix = metricPathPrefix;
     }
 
+    public MetricOverride[] getMetricOverrides() {
+        return metricOverrides;
+    }
+
+    public void setMetricOverrides(MetricOverride[] metricOverrides) {
+        this.metricOverrides = metricOverrides;
+    }
 }

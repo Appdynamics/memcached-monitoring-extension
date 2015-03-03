@@ -4,5 +4,15 @@ servers:
   - server: "192.168.57.102:11211"
     displayName: myUbuntu
 
-metricPrefix:  "Custom Metrics|Memcached|"
+metricPathPrefix:  "Custom Metrics|Memcached|"
+
+#Metric Overrides. Change this if you want to transform the metric key or value or its properties.
+metricOverrides:
+  - metricKey: ".*Ratio.*"
+    postfix: "Percent"
+    multiplier: 100
+
+  - metricKey: ".*Cache.*Rate.*"
+    postfix: "Percent"
+    multiplier: 100
 
