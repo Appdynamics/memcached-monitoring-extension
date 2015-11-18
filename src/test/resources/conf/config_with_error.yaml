@@ -4,5 +4,5 @@ servers:
   - serv
     displayName: myUbuntu
 
-metricPathPrefix:  "Custom Metrics|Memcached|"
+metricPrefix:  "Custom Metrics|Memcached|"
 

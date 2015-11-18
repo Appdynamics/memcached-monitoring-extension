@@ -17,12 +17,16 @@
 package com.appdynamics.extensions.memcached;
 
 import com.appdynamics.extensions.PathResolver;
+import com.appdynamics.extensions.crypto.CryptoUtil;
+import com.appdynamics.extensions.file.FileLoader;
 import com.appdynamics.extensions.memcached.config.Configuration;
 import com.appdynamics.extensions.memcached.config.Server;
 import com.appdynamics.extensions.util.metrics.Metric;
 import com.appdynamics.extensions.util.metrics.MetricFactory;
 import com.appdynamics.extensions.yml.YmlReader;
-import com.google.common.base.Strings;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.collect.Maps;
 import com.singularity.ee.agent.systemagent.api.AManagedMonitor;
 import com.singularity.ee.agent.systemagent.api.MetricWriter;
 import com.singularity.ee.agent.systemagent.api.TaskExecutionContext;
@@ -33,16 +37,20 @@ import net.rubyeye.xmemcached.MemcachedClientBuilder;
 import net.rubyeye.xmemcached.XMemcachedClientBuilder;
 import net.rubyeye.xmemcached.command.BinaryCommandFactory;
 import net.rubyeye.xmemcached.utils.AddrUtil;
-import org.apache.log4j.Logger;
-import org.yaml.snakeyaml.Yaml;
-import org.yaml.snakeyaml.constructor.Constructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.math.BigInteger;
 import java.net.InetSocketAddress;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
+
+import static com.appdynamics.TaskInputArgs.ENCRYPTION_KEY;
+import static com.appdynamics.TaskInputArgs.PASSWORD_ENCRYPTED;
+import static com.appdynamics.extensions.util.metrics.MetricConstants.METRICS_SEPARATOR;
+
 
 /**
  * An entry point into AppDynamics extensions.
@@ -50,75 +58,111 @@ import java.util.*;
 public class MemcachedMonitor extends AManagedMonitor{
 
     public static final String CONFIG_ARG = "config-file";
-    public static final Logger logger = Logger.getLogger(MemcachedMonitor.class);
-    public static final String COLON = ":";
-    public static final String METRIC_SEPARATOR = "|";
-    public static final int DEFAULT_MEMCACHED_PORT = 11211;
-    public static final int TIMEOUT = 60000;
-
-    private static String logPrefix;
+    public static final Logger logger = LoggerFactory.getLogger(MemcachedMonitor.class);
+    public static final String METRICS_COLLECTION_SUCCESSFUL = "Metrics Collection Successful";
+    public static final String FAILED = "0";
+    public static final String SUCCESS = "1";
+    private volatile boolean initialized;
+    private Configuration config;
+    private Cache<String, BigInteger> cache;
 
     public MemcachedMonitor(){
-        String msg = "Using Monitor Version [" + getImplementationVersion() + "]";
-        logger.info(msg);
-        System.out.println(msg);
+        System.out.println(logVersion());
     }
 
-    public TaskOutput execute(Map<String, String> taskArgs, TaskExecutionContext taskExecutionContext) throws TaskExecutionException {
-        if(taskArgs != null) {
-            logger.info("Starting the Memcached Monitoring task.");
-            if (logger.isDebugEnabled()) {
-                logger.debug("Task Arguments Passed ::" + taskArgs);
+    public TaskOutput execute(Map<String, String> taskArgs, TaskExecutionContext out) throws TaskExecutionException {
+        logVersion();
+        try {
+            initialize(taskArgs);
+            //collect the metrics
+            List<InstanceMetric> instanceMetrics = collectMetrics();
+            //adding metric overrides
+            MetricFactory<String> metricFactory = new MetricFactory<String>(config.getMetricOverrides());
+            for(InstanceMetric instance : instanceMetrics){
+                instance.getAllMetrics().addAll(metricFactory.process(instance.getMetricsMap()));
+
             }
-            String configFilename = getConfigFilename(taskArgs.get(CONFIG_ARG));
-            try {
-                //read the config.
-                Configuration config = YmlReader.readFromFile(configFilename,Configuration.class);
-                //collect the metrics
-                List<InstanceMetric> instanceMetrics = collectMetrics(config);
-                //adding metric overrides
-                MetricFactory<String> metricFactory = new MetricFactory<String>(config.getMetricOverrides());
-                for(InstanceMetric instance : instanceMetrics){
-                    instance.getAllMetrics().addAll(metricFactory.process(instance.getMetricsMap()));
+            //print the metrics
+            for(InstanceMetric instance: instanceMetrics){
+                printMetrics(instance.getAllMetrics(),instance.getDisplayName());
+                if(!instance.getAllMetrics().isEmpty()){
+                    printMetric(getMetricPrefix(instance.getDisplayName()) + METRICS_COLLECTION_SUCCESSFUL, SUCCESS, MetricWriter.METRIC_AGGREGATION_TYPE_OBSERVATION,MetricWriter.METRIC_TIME_ROLLUP_TYPE_CURRENT,MetricWriter.METRIC_CLUSTER_ROLLUP_TYPE_INDIVIDUAL);
                 }
-                //print the metrics
-                for(InstanceMetric instance: instanceMetrics){
-                    printMetrics(instance.getAllMetrics(),config,instance);
+                else {
+                    printMetric(getMetricPrefix(instance.getDisplayName()) + METRICS_COLLECTION_SUCCESSFUL, FAILED, MetricWriter.METRIC_AGGREGATION_TYPE_OBSERVATION,MetricWriter.METRIC_TIME_ROLLUP_TYPE_CURRENT,MetricWriter.METRIC_CLUSTER_ROLLUP_TYPE_INDIVIDUAL);
                 }
-                logger.info("Memcached monitoring task completed successfully.");
-                return new TaskOutput("Memcached monitoring task completed successfully.");
-            } catch (FileNotFoundException e) {
-                logger.error("Config file not found :: " + configFilename, e);
-            } catch (Exception e) {
-                logger.error("Metrics collection failed", e);
+            }
+            logger.info("Memcached monitor run completed successfully.");
+            return new TaskOutput("Memcached monitor run completed successfully.");
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.error("Metrics collection failed", e);
+        }
+        throw new TaskExecutionException("Memcached monitoring run completed with failures.");
+    }
+
+
+    private void initialize(Map<String, String> taskArgs) {
+        if(!initialized){
+            //read the config.
+            final String configFilePath = taskArgs.get(CONFIG_ARG);
+            File configFile = PathResolver.getFile(configFilePath, AManagedMonitor.class);
+            if(configFile != null && configFile.exists()){
+                FileLoader.load(new FileLoader.Listener() {
+                    public void load(File file) {
+                        String path = file.getAbsolutePath();
+                        try {
+                            if (path.contains(configFilePath)) {
+                                logger.info("The file [{}] has changed, reloading the config", file.getAbsolutePath());
+                                reloadConfig(file);
+                            } else {
+                                logger.warn("Unknown file [{}] changed, ignoring", file.getAbsolutePath());
+                            }
+                        } catch (Exception e) {
+                            logger.error("Exception while reloading the file {}" ,file.getAbsolutePath(), e);
+                        }
+                    }
+                }, configFilePath);
+            }
+            else{
+                logger.error("Config file is not found.The config file path {} is resolved to {}",
+                        taskArgs.get(CONFIG_ARG), configFile != null ? configFile.getAbsolutePath() : null);
+            }
+            initialized = true;
+            cache = CacheBuilder.newBuilder().expireAfterWrite(5, TimeUnit.MINUTES).build();
+        }
+    }
+
+    private void reloadConfig(File file) {
+        config = YmlReader.readFromFile(file, Configuration.class);
+        if (config != null) {
+            //decrypt password
+            if(config.getEncryptionKey() != null){
+                for(Server server : config.getServers()) {
+                    Map cryptoMap = Maps.newHashMap();
+                    cryptoMap.put(PASSWORD_ENCRYPTED,server.getEncryptedPassword());
+                    cryptoMap.put(ENCRYPTION_KEY,config.getEncryptionKey());
+                    server.setPassword(CryptoUtil.getPassword(cryptoMap));
+                }
             }
         }
-        throw new TaskExecutionException("Memcached monitoring task completed with failures.");
-    }
-
-
-    private void printMetrics(List<Metric> allMetrics,Configuration configuration,InstanceMetric instance) {
-        String prefix = getMetricPathPrefix(configuration,instance);
-        for(Metric aMetric:allMetrics){
-            printMetric(prefix + aMetric.getMetricPath(),aMetric.getMetricValue().toString(),aMetric.getAggregator(),aMetric.getTimeRollup(),aMetric.getClusterRollup());
+        else {
+            throw new IllegalArgumentException("The config cannot be initialized from the file " + file.getAbsolutePath());
         }
     }
 
-    private String getMetricPathPrefix(Configuration config, InstanceMetric instance) {
-        return config.getMetricPathPrefix() + instance.getDisplayName() + METRIC_SEPARATOR;
-    }
+
     /**
      * Collects all the metrics by connecting to memcached servers through XmemcachedClient.
-     * @param config
-     * @return Map
      * @throws Exception
      */
-    private List<InstanceMetric> collectMetrics(Configuration config) throws Exception {
+    private List<InstanceMetric> collectMetrics() throws Exception {
         MemcachedClient memcachedClient = null;
         try {
-            memcachedClient = getMemcachedClient(config);
-            Map<InetSocketAddress, Map<String, String>> stats = memcachedClient.getStats(TIMEOUT);
-            Map<String, String> lookup = createDisplayNameLookup(config);
+            Map<String, String> lookup = createDisplayNameLookup();
+            memcachedClient = getMemcachedClient();
+
+            Map<InetSocketAddress, Map<String, String>> stats = memcachedClient.getStats(config.getTimeout());
             return translateMetrics(stats, lookup);
         }
         catch(Exception e){
@@ -126,23 +170,53 @@ public class MemcachedMonitor extends AManagedMonitor{
             throw e;
         }
         finally {
-            memcachedClient.shutdown();
+            if (memcachedClient != null) {
+                memcachedClient.shutdown();
+            }
         }
+    }
+
+
+    private void printMetrics(List<Metric> allMetrics,String displayName) {
+        Set<String> ignoreDelta = config.getIgnoreDelta();
+        String prefix = getMetricPrefix(displayName);
+        for(Metric aMetric:allMetrics) {
+            String metricPath = prefix + aMetric.getMetricPath();
+            BigInteger metricValue = aMetric.getMetricValue();
+            if (ignoreDelta.contains(aMetric.getMetricPath())) {
+                logger.debug("Ignore delta calculation for {}" + metricPath);
+                printMetric(metricPath, metricValue.toString(), aMetric.getAggregator(), aMetric.getTimeRollup(), aMetric.getClusterRollup());
+            }
+            else{
+                BigInteger prevValue = cache.getIfPresent(aMetric.getMetricPath());
+                cache.put(aMetric.getMetricPath(), metricValue);
+                if(prevValue != null){
+                    BigInteger deltaValue = metricValue.subtract(prevValue);
+                    printMetric(metricPath, deltaValue.toString(), aMetric.getAggregator(), aMetric.getTimeRollup(), aMetric.getClusterRollup());
+                }
+
+            }
+        }
+    }
+
+
+
+    private String getMetricPrefix(String displayName) {
+        return config.getMetricPrefix() + displayName + METRICS_SEPARATOR;
     }
 
 
     /**
      * Creates a lookup dictionary from configuration.
-     * @param config
      * @return Map
      */
-    private Map<String,String> createDisplayNameLookup(Configuration config) {
+    private Map<String,String> createDisplayNameLookup() {
         Map<String,String> lookup = new HashMap<String,String>();
         if(config != null && config.getServers() != null){
             for(Server server : config.getServers()) {
-                String splits[] = server.getServer().split(COLON);
+                String splits[] = server.getServer().split(":");
                 String hostname = "";
-                int port = DEFAULT_MEMCACHED_PORT;
+                int port = 11211;
                 if(splits != null && splits.length > 1){
                     hostname = splits[0];
                     port = Integer.parseInt(splits[1]);
@@ -183,18 +257,19 @@ public class MemcachedMonitor extends AManagedMonitor{
 
     /**
      * Builds a memcached client.
-     * @param config
      * @return MemcachedClient
      * @throws IOException
      */
-    private MemcachedClient getMemcachedClient(Configuration config) throws IOException {
-        String aStringOfServers = getAllServersAsAString(config);
+    private MemcachedClient getMemcachedClient() throws IOException {
+        String aStringOfServers = getAllServersAsAString();
         MemcachedClientBuilder builder = new XMemcachedClientBuilder(AddrUtil.getAddresses(aStringOfServers));
         builder.setCommandFactory(new BinaryCommandFactory());
         try {
-            return builder.build();
+            MemcachedClient client =  builder.build();
+            logger.debug("Built a memcached client for servers {}",aStringOfServers);
+            return client;
         } catch (IOException e) {
-            logger.error("Cannot create Memcached Client for servers :: " + aStringOfServers , e);
+            logger.error("Cannot create Memcached Client for servers :: {}",aStringOfServers , e);
             throw e;
         }
     }
@@ -202,10 +277,9 @@ public class MemcachedMonitor extends AManagedMonitor{
 
     /**
      * Returns all the servers in the config as a string eg. "hostname:port hostname1:port1"
-     * @param config
      * @return
      */
-    private String getAllServersAsAString(Configuration config) {
+    private String getAllServersAsAString() {
         StringBuffer str = new StringBuffer();
         if(config != null && config.getServers() != null){
             for(Server server : config.getServers()) {
@@ -215,32 +289,6 @@ public class MemcachedMonitor extends AManagedMonitor{
         }
         return str.toString();
     }
-
-
-
-
-    /**
-     * Returns a config file name,
-     * @param filename
-     * @return String
-     */
-    private String getConfigFilename(String filename) {
-        if(filename == null){
-            return "";
-        }
-        //for absolute paths
-        if(new File(filename).exists()){
-            return filename;
-        }
-        //for relative paths
-        File jarPath = PathResolver.resolveDirectory(AManagedMonitor.class);
-        String configFileName = "";
-        if(!Strings.isNullOrEmpty(filename)){
-            configFileName = jarPath + File.separator + filename;
-        }
-        return configFileName;
-    }
-
 
 
 
@@ -261,15 +309,21 @@ public class MemcachedMonitor extends AManagedMonitor{
         );
      //   System.out.println("Sending [" + aggType + METRIC_SEPARATOR + timeRollupType + METRIC_SEPARATOR + clusterRollupType
      //           + "] metric = " + metricName + " = " + metricValue);
-        if (logger.isDebugEnabled()) {
-            logger.debug("Sending [" + aggType + METRIC_SEPARATOR + timeRollupType + METRIC_SEPARATOR + clusterRollupType
-                    + "] metric = " + metricName + " = " + metricValue);
-        }
+        logger.debug("Sending [{}|{}|{}] metric= {},value={}", aggType, timeRollupType, clusterRollupType,metricName,metricValue);
         metricWriter.printMetric(metricValue);
     }
 
-    public static String getImplementationVersion() {
+
+    private String logVersion() {
+        String msg = "Using Monitor Version [" + getImplementationVersion() + "]";
+        logger.info(msg);
+        return msg;
+    }
+
+    public String getImplementationVersion() {
         return MemcachedMonitor.class.getPackage().getImplementationTitle();
     }
+
+
 
 }

@@ -21,6 +21,9 @@ public class Server {
 
     private String displayName;
     private String server;
+    private String encryptedPassword;
+    private String username;
+    private String password;
 
     public String getServer() {
         return server;
@@ -36,6 +39,30 @@ public class Server {
 
     public void setDisplayName(String displayName) {
         this.displayName = displayName;
+    }
+
+    public String getEncryptedPassword() {
+        return encryptedPassword;
+    }
+
+    public void setEncryptedPassword(String encryptedPassword) {
+        this.encryptedPassword = encryptedPassword;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 }
 
