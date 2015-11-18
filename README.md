@@ -161,7 +161,7 @@ Find out more in the [Community][].
 
 For any questions or feature request, please contact [AppDynamics Center of Excellence][].
 
-**Version:** 1.0
+**Version:** 2.0
 **Controller Compatibility:** 3.7 or later
 **Memcached Version Tested On:** 1.4.13
 
