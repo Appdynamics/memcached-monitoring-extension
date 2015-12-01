@@ -188,8 +188,8 @@ public class MemcachedMonitor extends AManagedMonitor{
                 printMetric(metricPath, metricValue.toString(), aMetric.getAggregator(), aMetric.getTimeRollup(), aMetric.getClusterRollup());
             }
             else{
-                BigInteger prevValue = cache.getIfPresent(aMetric.getMetricPath());
-                cache.put(aMetric.getMetricPath(), metricValue);
+                BigInteger prevValue = cache.getIfPresent(metricPath);
+                cache.put(metricPath, metricValue);
                 if(prevValue != null){
                     BigInteger deltaValue = metricValue.subtract(prevValue);
                     printMetric(metricPath, deltaValue.toString(), aMetric.getAggregator(), aMetric.getTimeRollup(), aMetric.getClusterRollup());
