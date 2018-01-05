@@ -86,9 +86,11 @@ public class MemcachedMonitor extends AManagedMonitor{
             for(InstanceMetric instance: instanceMetrics){
                 printMetrics(instance.getAllMetrics(),instance.getDisplayName());
                 if(!instance.getAllMetrics().isEmpty()){
+					logger.debug("Metrics for: " + getMetricPrefix(instance.getDisplayName() + " Successful"));
                     printMetric(getMetricPrefix(instance.getDisplayName()) + METRICS_COLLECTION_SUCCESSFUL, SUCCESS, MetricWriter.METRIC_AGGREGATION_TYPE_OBSERVATION,MetricWriter.METRIC_TIME_ROLLUP_TYPE_CURRENT,MetricWriter.METRIC_CLUSTER_ROLLUP_TYPE_INDIVIDUAL);
                 }
                 else {
+					logger.debug("Metrics for: " + getMetricPrefix(instance.getDisplayName() + " failed"));
                     printMetric(getMetricPrefix(instance.getDisplayName()) + METRICS_COLLECTION_SUCCESSFUL, FAILED, MetricWriter.METRIC_AGGREGATION_TYPE_OBSERVATION,MetricWriter.METRIC_TIME_ROLLUP_TYPE_CURRENT,MetricWriter.METRIC_CLUSTER_ROLLUP_TYPE_INDIVIDUAL);
                 }
             }
@@ -129,6 +131,7 @@ public class MemcachedMonitor extends AManagedMonitor{
                         taskArgs.get(CONFIG_ARG), configFile != null ? configFile.getAbsolutePath() : null);
             }
             initialized = true;
+            logger.debug("Configuration loaded successfully");
             cache = CacheBuilder.newBuilder().expireAfterWrite(5, TimeUnit.MINUTES).build();
         }
     }
@@ -163,7 +166,10 @@ public class MemcachedMonitor extends AManagedMonitor{
             memcachedClient = getMemcachedClient();
 
             Map<InetSocketAddress, Map<String, String>> stats = memcachedClient.getStats(config.getTimeout());
+            logger.debug("Memcached: Stats obtained {}", stats.toString());
             return translateMetrics(stats, lookup);
+            
+            
         }
         catch(Exception e){
             logger.error("Unable to collect memcached metrics ", e);
@@ -181,13 +187,15 @@ public class MemcachedMonitor extends AManagedMonitor{
         Set<String> ignoreDelta = config.getIgnoreDelta();
         String prefix = getMetricPrefix(displayName);
         for(Metric aMetric:allMetrics) {
+			logger.debug("Memcached: Calculating metrics");
             String metricPath = prefix + aMetric.getMetricPath();
             BigInteger metricValue = aMetric.getMetricValue();
             if (ignoreDelta.contains(aMetric.getMetricPath())) {
-                logger.debug("Ignore delta calculation for {}" + metricPath);
+                logger.debug("Memcached: Ignore delta calculation for {}" + metricPath);
                 printMetric(metricPath, metricValue.toString(), aMetric.getAggregator(), aMetric.getTimeRollup(), aMetric.getClusterRollup());
             }
             else{
+				logger.debug("Memcached: Calculating delta value for {}", metricPath);
                 BigInteger prevValue = cache.getIfPresent(metricPath);
                 cache.put(metricPath, metricValue);
                 if(prevValue != null){
