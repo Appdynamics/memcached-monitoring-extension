@@ -48,9 +48,9 @@ public class Configuration {
     }
 
     public void setMetricPrefix(String metricPrefix) {
-        if(!metricPrefix.endsWith(METRICS_SEPARATOR)){
+        /*if(!metricPrefix.endsWith(METRICS_SEPARATOR)){
             metricPrefix = metricPrefix + METRICS_SEPARATOR;
-        }
+        }*/
         this.metricPrefix = metricPrefix;
     }
 
