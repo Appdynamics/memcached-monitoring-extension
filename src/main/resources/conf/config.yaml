@@ -1,7 +1,7 @@
 ### ANY CHANGES TO THIS FILE DOES NOT REQUIRE A RESTART ###
 
 #This will create this metric in all the tiers, under this path
-metricPrefix: Custom Metrics|Memcached|
+metricPrefix: Custom Metrics|Memcached
 
 #This will create it in specific Tier. Replace <TIER_NAME>
 #metricPrefix: Server|Component:<TIER_NAME>|Custom Metrics|Memcached
