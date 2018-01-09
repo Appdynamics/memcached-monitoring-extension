@@ -17,7 +17,6 @@
 package com.appdynamics.extensions.memcached;
 
 import com.appdynamics.extensions.PathResolver;
-import com.appdynamics.extensions.StringUtils;
 import com.appdynamics.extensions.crypto.CryptoUtil;
 import com.appdynamics.extensions.file.FileLoader;
 import com.appdynamics.extensions.memcached.config.Configuration;

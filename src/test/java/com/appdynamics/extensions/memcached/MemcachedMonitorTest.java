@@ -1,15 +1,12 @@
 package com.appdynamics.extensions.memcached;
 
-import com.appdynamics.extensions.memcached.config.Configuration;
-import com.appdynamics.extensions.yml.YmlReader;
+
 import com.google.common.collect.Maps;
 import com.singularity.ee.agent.systemagent.api.TaskOutput;
 import com.singularity.ee.agent.systemagent.api.exception.TaskExecutionException;
-import org.junit.Assert;
 import org.junit.Test;
 
 
-import java.io.File;
 import java.util.Map;
 import java.util.concurrent.Executors;
 
@@ -52,4 +49,4 @@ public class MemcachedMonitorTest {
     public void shouldThrowExceptionWhenTaskArgsIsNull() throws TaskExecutionException {
         TaskOutput output = memcachedMonitor.execute(null, null);
     }
-   }
+}
