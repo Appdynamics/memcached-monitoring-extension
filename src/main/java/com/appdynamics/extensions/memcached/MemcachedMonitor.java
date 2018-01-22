@@ -24,6 +24,7 @@ import com.appdynamics.extensions.memcached.config.Server;
 import com.appdynamics.extensions.util.metrics.Metric;
 import com.appdynamics.extensions.util.metrics.MetricFactory;
 import com.appdynamics.extensions.yml.YmlReader;
+import com.google.common.base.Strings;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Maps;
@@ -202,7 +203,12 @@ public class MemcachedMonitor extends AManagedMonitor{
 
 
     private String getMetricPrefix(String displayName) {
-        return config.getMetricPrefix() + displayName + METRICS_SEPARATOR;
+        if(!Strings.isNullOrEmpty(displayName)) {
+            return config.getMetricPrefix() + displayName + METRICS_SEPARATOR;
+        }
+        else{
+            return config.getMetricPrefix();
+        }
     }
 
 
